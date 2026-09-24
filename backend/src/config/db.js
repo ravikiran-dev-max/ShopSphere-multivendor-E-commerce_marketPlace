@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 import dns from 'dns';
 
-// Fix Node.js DNS SRV resolution for MongoDB Atlas on Windows environments
+// Fix Node.js DNS SRV resolution for MongoDB Atlas on Windows environments if needed
 try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
+  if (process.platform === 'win32' || process.env.ENABLE_CUSTOM_DNS === 'true') {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  }
 } catch (e) {
   // Ignore fallback if custom DNS set
 }
