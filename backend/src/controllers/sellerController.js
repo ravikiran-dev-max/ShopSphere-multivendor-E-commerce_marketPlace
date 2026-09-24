@@ -9,25 +9,17 @@ import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
 /**
- * @desc    Get all sellers (Public lists APPROVED, Admin can filter by PENDING/APPROVED/SUSPENDED)
+ * @desc    Get all sellers for Public catalog
  * @route   GET /api/v1/sellers
- * @access  Public / Admin
+ * @access  Public
  */
 export const getAllSellers = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 12;
   const skip = (page - 1) * limit;
 
-  const { search, status } = req.query;
-
-  const query = {};
-
-  // If user is not admin, only show APPROVED sellers
-  if (!req.user || req.user.role !== 'ADMIN') {
-    query.status = 'APPROVED';
-  } else if (status) {
-    query.status = status;
-  }
+  const { search } = req.query;
+  const query = { status: 'APPROVED' };
 
   if (search) {
     query.storeName = { $regex: search, $options: 'i' };
@@ -44,7 +36,45 @@ export const getAllSellers = asyncHandler(async (req, res) => {
     new ApiResponse(
       200,
       sellers,
-      'Sellers retrieved successfully.',
+      'Public approved sellers retrieved successfully.',
+      { page, limit, total, totalPages: Math.ceil(total / limit) }
+    )
+  );
+});
+
+/**
+ * @desc    Get all seller profiles for Admin (Pending, Approved, Rejected, Suspended)
+ * @route   GET /api/v1/sellers/admin/all
+ * @access  Private (Admin Only)
+ */
+export const getAdminSellersList = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const { search, status } = req.query;
+
+  const query = {};
+  if (status && status !== 'ALL') {
+    query.status = status;
+  }
+
+  if (search) {
+    query.storeName = { $regex: search, $options: 'i' };
+  }
+
+  const total = await SellerProfile.countDocuments(query);
+  const sellers = await SellerProfile.find(query)
+    .populate('user', 'name email phone avatar createdAt')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      sellers,
+      'Admin sellers list retrieved successfully.',
       { page, limit, total, totalPages: Math.ceil(total / limit) }
     )
   );

@@ -91,6 +91,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import supportRoutes from './routes/supportRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import deliveryRoutes from './routes/deliveryRoutes.js';
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
@@ -103,6 +104,8 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/support', supportRoutes);
 app.use('/api/v1/ai', aiRoutes);
+app.use('/api/v1/deliveries', deliveryRoutes);
+
 
 
 

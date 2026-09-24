@@ -163,6 +163,24 @@ const Navbar = () => {
                         </Link>
                       )}
 
+                      {(user?.role === 'DELIVERY' || user?.role === 'RIDER') && (
+                        <Link
+                          to="/rider"
+                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
+                        >
+                          <FiGrid className="w-4 h-4" /> Rider Portal
+                        </Link>
+                      )}
+
+                      {user?.role === 'SUPPORT' && (
+                        <Link
+                          to="/support-agent"
+                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
+                        >
+                          <FiGrid className="w-4 h-4" /> Support Portal
+                        </Link>
+                      )}
+
                       <Link
                         to="/orders"
                         className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
