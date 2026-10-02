@@ -11,8 +11,8 @@ connectDB()
   .then(() => {
     const server = app.listen(PORT, () => {
       console.log(`[ShopSphere Server] Running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode.`);
-      console.log(`[ShopSphere Server] Base API: http://localhost:${PORT}/`);
-      console.log(`[ShopSphere Server] Health Check: http://localhost:${PORT}/api/v1/health`);
+      console.log(`[ShopSphere Server] Base API: https://shopsphere-multivendor-e-commerce-ndk7.onrender.com${PORT}/`);
+      console.log(`[ShopSphere Server] Health Check: https://shopsphere-multivendor-e-commerce-ndk7.onrender.com${PORT}/api/v1/health`);
     });
 
     // Graceful Shutdown handling for deployment platforms (Render, Railway, Fly.io, Docker)

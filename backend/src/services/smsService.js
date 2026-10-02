@@ -30,7 +30,7 @@ export const sendDeliveryOTP = async (phoneNumber, otp, orderNumber) => {
 
   return {
     success: true,
-    phoneNumber: phoneNumber || '+91 9876543212',
+    phoneNumber: phoneNumber || '+91 987XXXXXX',
     otp,
     provider,
     dispatchedAt: new Date().toISOString(),
