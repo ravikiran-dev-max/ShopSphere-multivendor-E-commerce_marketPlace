@@ -10,6 +10,8 @@ import ProtectedRoute from './ProtectedRoute.jsx';
 import Home from '../pages/Home.jsx';
 import Login from '../pages/Login.jsx';
 import Register from '../pages/Register.jsx';
+import ForgotPassword from '../pages/ForgotPassword.jsx';
+import ResetPassword from '../pages/ResetPassword.jsx';
 import Products from '../pages/Products.jsx';
 import ProductDetails from '../pages/ProductDetails.jsx';
 import Cart from '../pages/Cart.jsx';
@@ -35,6 +37,9 @@ import SellerOrders from '../pages/SellerOrders.jsx';
 
 import RiderDashboard from '../pages/RiderDashboard.jsx';
 import RiderDeliveries from '../pages/RiderDeliveries.jsx';
+import RiderHistory from '../pages/RiderHistory.jsx';
+import RiderProfile from '../pages/RiderProfile.jsx';
+
 
 import SupportDashboard from '../pages/SupportDashboard.jsx';
 
@@ -49,6 +54,8 @@ const AppRoutes = () => {
         <Route index element={<Home />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password" element={<ResetPassword />} />
         <Route path="seller/register" element={<Register defaultRole="SELLER" />} />
         <Route path="products" element={<Products />} />
         <Route path="products/item/:slug" element={<ProductDetails />} />
@@ -109,9 +116,8 @@ const AppRoutes = () => {
         <Route path="/rider" element={<RiderLayout />}>
           <Route index element={<RiderDashboard />} />
           <Route path="deliveries" element={<RiderDeliveries />} />
-          <Route path="map" element={<RiderDeliveries />} />
-          <Route path="history" element={<PlaceholderView title="Rider Delivery History" description="View past verified deliveries." />} />
-          <Route path="profile" element={<PlaceholderView title="Rider Profile" description="Manage duty status and vehicle details." />} />
+          <Route path="history" element={<RiderHistory />} />
+          <Route path="profile" element={<RiderProfile />} />
         </Route>
       </Route>
 

@@ -5,6 +5,8 @@ import Product from '../models/Product.js';
 import Inventory from '../models/Inventory.js';
 import Payment from '../models/Payment.js';
 import Notification from '../models/Notification.js';
+import Delivery from '../models/Delivery.js';
+import User from '../models/User.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -158,6 +160,34 @@ export const checkoutOrder = asyncHandler(async (req, res) => {
       message: `You have received a new sub-order ${sellerOrderNumber} totaling ₹${sellerSubtotal}.`,
       type: 'ORDER_STATUS',
     });
+
+    // Automatically assign active delivery partner & push to rider dashboard
+    const rider = await User.findOne({ role: { $in: ['DELIVERY', 'RIDER'] } });
+    if (rider) {
+      const trackingCode = `TRK-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+      await Delivery.create({
+        trackingCode,
+        parentOrder: parentOrder._id,
+        sellerOrder: sellerOrder._id,
+        deliveryPartner: rider._id,
+        pickupAddress: {
+          storeName: 'Seller Warehouse Hub',
+          street: '12 Logistics Way, Sector 4',
+          city: shippingAddress.city || 'Mumbai',
+          state: shippingAddress.state || 'Maharashtra',
+          zipCode: shippingAddress.zipCode || '400002',
+        },
+        deliveryAddress: shippingAddress,
+        status: 'ASSIGNED',
+      });
+
+      await Notification.create({
+        user: rider._id,
+        title: '🚚 New Delivery Assigned',
+        message: `Package ready for dispatch: ${sellerOrderNumber} destined for ${shippingAddress.city || 'customer'}.`,
+        type: 'DELIVERY_UPDATE',
+      });
+    }
   }
 
   parentOrder.sellerOrders = createdSellerOrders;

@@ -20,6 +20,7 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       enum: [
         'ORDER_STATUS',
+        'DELIVERY_UPDATE',
         'RETURN_UPDATE',
         'REFUND_UPDATE',
         'SELLER_APPROVAL',

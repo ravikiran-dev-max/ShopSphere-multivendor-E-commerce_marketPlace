@@ -143,15 +143,48 @@ export const updateUserRole = asyncHandler(async (req, res) => {
  * @access  Private (Self)
  */
 export const updateUserProfile = asyncHandler(async (req, res) => {
-  const { name, phone, avatar } = req.body;
+  const { name, email, phone, avatar } = req.body;
 
   const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new ApiError(404, 'User not found.');
+  }
 
-  if (name) user.name = name;
-  if (phone) user.phone = phone;
-  if (avatar) user.avatar = avatar;
+  const changes = {};
+
+  if (email && email.toLowerCase() !== user.email.toLowerCase()) {
+    const existingEmail = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      throw new ApiError(409, 'This email address is already in use by another account.');
+    }
+    changes.oldEmail = user.email;
+    changes.newEmail = email.toLowerCase();
+    user.email = email.toLowerCase();
+  }
+
+  if (name) {
+    changes.name = name;
+    user.name = name;
+  }
+  if (phone) {
+    changes.phone = phone;
+    user.phone = phone;
+  }
+  if (avatar) {
+    changes.avatar = avatar;
+    user.avatar = avatar;
+  }
 
   await user.save();
+
+  await AuditLog.create({
+    actor: user._id,
+    action: 'PROFILE_UPDATED',
+    targetModel: 'User',
+    targetId: user._id,
+    ipAddress: req.ip,
+    metadata: changes,
+  });
 
   const updatedUser = user.toObject();
   delete updatedUser.password;

@@ -65,3 +65,48 @@ export const getProductReviews = asyncHandler(async (req, res) => {
 
   res.status(200).json(new ApiResponse(200, reviews, 'Product reviews fetched.'));
 });
+
+/**
+ * @desc    Check if customer can review a product (has delivered order & not already reviewed)
+ * @route   GET /api/v1/reviews/eligibility/:productId
+ * @access  Private
+ */
+export const checkReviewEligibility = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+
+  const purchasedSubOrder = await SellerOrder.findOne({
+    customer: req.user._id,
+    'items.product': productId,
+    status: 'DELIVERED',
+  });
+
+  const existingReview = await Review.findOne({
+    product: productId,
+    customer: req.user._id,
+  });
+
+  const canReview = !!purchasedSubOrder && !existingReview;
+
+  res.status(200).json(
+    new ApiResponse(200, {
+      canReview,
+      hasDeliveredOrder: !!purchasedSubOrder,
+      hasReviewed: !!existingReview,
+      existingReview,
+    }, 'Review eligibility status.')
+  );
+});
+
+/**
+ * @desc    Get all reviews submitted by logged-in customer
+ * @route   GET /api/v1/reviews/my-reviews
+ * @access  Private
+ */
+export const getMyReviews = asyncHandler(async (req, res) => {
+  const reviews = await Review.find({ customer: req.user._id })
+    .populate('product', 'title slug images price')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json(new ApiResponse(200, reviews, 'Customer reviews retrieved.'));
+});
+

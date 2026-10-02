@@ -5,6 +5,7 @@ import CustomerProfile from '../models/CustomerProfile.js';
 import SellerProfile from '../models/SellerProfile.js';
 import Cart from '../models/Cart.js';
 import Wishlist from '../models/Wishlist.js';
+import AuditLog from '../models/AuditLog.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -284,6 +285,15 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   user.resetPasswordExpire = Date.now() + 30 * 60 * 1000; // 30 mins
   await user.save();
 
+  await AuditLog.create({
+    actor: user._id,
+    action: 'PASSWORD_RESET_REQUESTED',
+    targetModel: 'User',
+    targetId: user._id,
+    ipAddress: req.ip,
+    metadata: { email: user.email },
+  });
+
   res.status(200).json(
     new ApiResponse(
       200,
@@ -322,6 +332,15 @@ export const resetPassword = asyncHandler(async (req, res) => {
   user.refreshTokens = []; // Revoke previous sessions
   await user.save();
 
+  await AuditLog.create({
+    actor: user._id,
+    action: 'PASSWORD_RESET_COMPLETED',
+    targetModel: 'User',
+    targetId: user._id,
+    ipAddress: req.ip,
+    metadata: { email: user.email },
+  });
+
   res.status(200).json(new ApiResponse(200, null, 'Password reset successful. Please sign in.'));
 });
 
@@ -347,5 +366,15 @@ export const changePassword = asyncHandler(async (req, res) => {
   user.password = newPassword;
   await user.save();
 
+  await AuditLog.create({
+    actor: user._id,
+    action: 'PASSWORD_UPDATED',
+    targetModel: 'User',
+    targetId: user._id,
+    ipAddress: req.ip,
+    metadata: { email: user.email },
+  });
+
   res.status(200).json(new ApiResponse(200, null, 'Password updated successfully.'));
 });
+

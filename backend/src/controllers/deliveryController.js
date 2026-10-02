@@ -258,3 +258,28 @@ export const verifyOTP = asyncHandler(async (req, res) => {
     )
   );
 });
+
+/**
+ * @desc    Get tracking & delivery status for a specific Seller Sub-Order
+ * @route   GET /api/v1/deliveries/track/sub-order/:sellerOrderId
+ * @access  Private (Customer, Seller, Admin, Rider)
+ */
+export const getDeliveryBySubOrder = asyncHandler(async (req, res) => {
+  const delivery = await Delivery.findOne({ sellerOrder: req.params.sellerOrderId })
+    .populate('deliveryPartner', 'name phone')
+    .populate({
+      path: 'sellerOrder',
+      populate: { path: 'seller', select: 'name storeName' },
+    });
+
+  if (!delivery) {
+    return res.status(200).json(
+      new ApiResponse(200, null, 'No active delivery dispatch record yet.')
+    );
+  }
+
+  res.status(200).json(
+    new ApiResponse(200, delivery, 'Delivery tracking details retrieved.')
+  );
+});
+
