@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   FiShoppingCart,
@@ -11,9 +11,12 @@ import {
   FiShield,
   FiMenu,
   FiX,
+  FiTruck,
+  FiLifeBuoy,
 } from 'react-icons/fi';
 import useAuthStore from '../../store/useAuthStore.js';
 import Button from './Button.jsx';
+import api from '../../services/api.js';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -21,6 +24,22 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'CUSTOMER') {
+      api
+        .get('/cart')
+        .then((res) => {
+          const totalQty =
+            res.data.data?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+          setCartCount(totalQty);
+        })
+        .catch(() => {});
+    } else {
+      setCartCount(0);
+    }
+  }, [isAuthenticated, user]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -31,7 +50,22 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    setIsUserDropdownOpen(false);
     navigate('/login');
+  };
+
+  const getOrdersLink = () => {
+    if (user?.role === 'SELLER') return '/seller/orders';
+    if (user?.role === 'DELIVERY' || user?.role === 'RIDER') return '/rider/deliveries';
+    if (user?.role === 'ADMIN') return '/admin/orders';
+    return '/orders';
+  };
+
+  const getOrdersLabel = () => {
+    if (user?.role === 'SELLER') return 'Store Sub-Orders';
+    if (user?.role === 'DELIVERY' || user?.role === 'RIDER') return 'My Deliveries';
+    if (user?.role === 'ADMIN') return 'Marketplace Orders';
+    return 'My Orders';
   };
 
   return (
@@ -112,9 +146,11 @@ const Navbar = () => {
             >
               <div className="relative">
                 <FiShoppingCart className="w-5 h-5" />
-                <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  0
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-in zoom-in">
+                    {cartCount}
+                  </span>
+                )}
               </div>
               <span className="text-sm font-semibold text-slate-800">Cart</span>
             </Link>
@@ -148,51 +184,73 @@ const Navbar = () => {
                       {user?.role === 'ADMIN' && (
                         <Link
                           to="/admin"
-                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2 font-medium"
                         >
-                          <FiShield className="w-4 h-4" /> Admin Dashboard
+                          <FiShield className="w-4 h-4 text-indigo-600" /> Admin Command
                         </Link>
                       )}
 
                       {user?.role === 'SELLER' && (
                         <Link
                           to="/seller"
-                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2 font-medium"
                         >
-                          <FiGrid className="w-4 h-4" /> Seller Portal
+                          <FiGrid className="w-4 h-4 text-indigo-600" /> Seller Portal
                         </Link>
                       )}
 
                       {(user?.role === 'DELIVERY' || user?.role === 'RIDER') && (
                         <Link
                           to="/rider"
-                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2 font-medium"
                         >
-                          <FiGrid className="w-4 h-4" /> Rider Portal
+                          <FiTruck className="w-4 h-4 text-indigo-600" /> Rider Portal
                         </Link>
                       )}
 
                       {user?.role === 'SUPPORT' && (
                         <Link
                           to="/support-agent"
-                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2 font-medium"
                         >
-                          <FiGrid className="w-4 h-4" /> Support Portal
+                          <FiGrid className="w-4 h-4 text-indigo-600" /> Support Desk
                         </Link>
                       )}
 
                       <Link
-                        to="/orders"
+                        to={getOrdersLink()}
+                        onClick={() => setIsUserDropdownOpen(false)}
                         className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
                       >
-                        <FiPackage className="w-4 h-4" /> My Orders
+                        <FiPackage className="w-4 h-4" /> {getOrdersLabel()}
+                      </Link>
+
+                      <Link
+                        to="/wishlist"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
+                      >
+                        <FiHeart className="w-4 h-4" /> Saved Wishlist
                       </Link>
 
                       <Link
                         to="/profile"
+                        onClick={() => setIsUserDropdownOpen(false)}
                         className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
                       >
-                        <FiUser className="w-4 h-4" /> Profile Settings
+                        <FiUser className="w-4 h-4" /> Profile Details
+                      </Link>
+
+                      <Link
+                        to="/support"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 gap-2"
+                      >
+                        <FiLifeBuoy className="w-4 h-4" /> Support Center
                       </Link>
                     </div>
 
@@ -259,11 +317,18 @@ const Navbar = () => {
             Browse Products
           </Link>
           <Link
+            to="/sellers"
+            className="block text-sm font-medium text-slate-700 py-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Top Sellers
+          </Link>
+          <Link
             to="/cart"
             className="block text-sm font-medium text-slate-700 py-2"
             onClick={() => setIsMenuOpen(false)}
           >
-            Cart (0)
+            Cart {cartCount > 0 ? `(${cartCount})` : ''}
           </Link>
           <Link
             to="/wishlist"
@@ -292,6 +357,52 @@ const Navbar = () => {
                 <p className="text-sm font-bold text-slate-900">{user?.name}</p>
                 <p className="text-xs text-slate-500">{user?.role}</p>
               </div>
+
+              {user?.role === 'ADMIN' && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block py-1.5 text-sm text-indigo-600 font-semibold"
+                >
+                  Admin Center
+                </Link>
+              )}
+              {user?.role === 'SELLER' && (
+                <Link
+                  to="/seller"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block py-1.5 text-sm text-indigo-600 font-semibold"
+                >
+                  Seller Hub
+                </Link>
+              )}
+              {(user?.role === 'DELIVERY' || user?.role === 'RIDER') && (
+                <Link
+                  to="/rider"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block py-1.5 text-sm text-indigo-600 font-semibold"
+                >
+                  Rider Portal
+                </Link>
+              )}
+              {user?.role === 'SUPPORT' && (
+                <Link
+                  to="/support-agent"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block py-1.5 text-sm text-indigo-600 font-semibold"
+                >
+                  Support Portal
+                </Link>
+              )}
+
+              <Link
+                to={getOrdersLink()}
+                onClick={() => setIsMenuOpen(false)}
+                className="block py-1.5 text-sm text-slate-700 font-medium"
+              >
+                {getOrdersLabel()}
+              </Link>
+
               <button
                 onClick={handleLogout}
                 className="w-full text-left py-2 text-sm text-rose-600 font-medium"

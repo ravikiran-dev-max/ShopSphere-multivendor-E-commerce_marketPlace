@@ -16,6 +16,10 @@ import Cart from '../pages/Cart.jsx';
 import Checkout from '../pages/Checkout.jsx';
 import Orders from '../pages/Orders.jsx';
 import SellersList from '../pages/SellersList.jsx';
+import SellerStore from '../pages/SellerStore.jsx';
+import Wishlist from '../pages/Wishlist.jsx';
+import Profile from '../pages/Profile.jsx';
+import SupportCenter from '../pages/SupportCenter.jsx';
 
 import AdminDashboard from '../pages/AdminDashboard.jsx';
 import AdminUsers from '../pages/AdminUsers.jsx';
@@ -45,18 +49,20 @@ const AppRoutes = () => {
         <Route index element={<Home />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="seller/register" element={<Register defaultRole="SELLER" />} />
         <Route path="products" element={<Products />} />
         <Route path="products/item/:slug" element={<ProductDetails />} />
         <Route path="sellers" element={<SellersList />} />
+        <Route path="sellers/store/:slug" element={<SellerStore />} />
+        <Route path="wishlist" element={<Wishlist />} />
 
         {/* Customer Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={['CUSTOMER']} />}>
           <Route path="cart" element={<Cart />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="orders" element={<Orders />} />
-          <Route path="wishlist" element={<PlaceholderView title="Customer Wishlist" description="View products saved to your wishlist." />} />
-          <Route path="profile" element={<PlaceholderView title="Customer Profile" description="Update personal info and delivery preferences." />} />
-          <Route path="support" element={<PlaceholderView title="Customer Help Center" description="Submit and track support tickets." />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="support" element={<SupportCenter />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

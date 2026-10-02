@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,22 +21,33 @@ const registerSchema = z.object({
   storeDescription: z.string().optional(),
 });
 
-const Register = () => {
+const Register = ({ defaultRole }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [isLoading, setIsLoading] = useState(false);
+
+  const initialRole =
+    defaultRole || (searchParams.get('role')?.toUpperCase() === 'SELLER' ? 'SELLER' : 'CUSTOMER');
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      role: 'CUSTOMER',
+      role: initialRole,
     },
   });
+
+  useEffect(() => {
+    if (initialRole) {
+      setValue('role', initialRole);
+    }
+  }, [initialRole, setValue]);
 
   const selectedRole = watch('role');
 
@@ -64,10 +75,16 @@ const Register = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto my-12 bg-white p-8 rounded-2xl shadow-xl border border-slate-100 space-y-6">
+    <div className="max-w-md mx-auto my-12 bg-white p-8 rounded-3xl shadow-xl border border-slate-100 space-y-6">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-extrabold text-slate-900">Create Your Account</h2>
-        <p className="text-sm text-slate-500">Join ShopSphere customer marketplace or sell products</p>
+        <h2 className="text-2xl font-extrabold text-slate-900">
+          {selectedRole === 'SELLER' ? 'Register Merchant Store' : 'Create Your Account'}
+        </h2>
+        <p className="text-sm text-slate-500">
+          {selectedRole === 'SELLER'
+            ? 'Open your seller storefront and reach thousands of marketplace buyers'
+            : 'Join ShopSphere customer marketplace to discover products'}
+        </p>
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -111,7 +128,7 @@ const Register = () => {
           <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700">Account Role</label>
           <select
             {...register('role')}
-            className="w-full rounded-lg border border-slate-300 bg-white text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="w-full rounded-xl border border-slate-300 bg-white text-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="CUSTOMER">Customer (Buy Products)</option>
             <option value="SELLER">Merchant Seller (Sell Products)</option>
@@ -119,7 +136,7 @@ const Register = () => {
         </div>
 
         {selectedRole === 'SELLER' && (
-          <div className="space-y-3 pt-2 border-t border-slate-100 animate-in fade-in">
+          <div className="space-y-3 pt-3 border-t border-slate-100 animate-in fade-in">
             <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Store Application Details</p>
             <Input
               label="Store Name"
@@ -135,14 +152,14 @@ const Register = () => {
                 placeholder="Brief summary of products you sell..."
                 rows={2}
                 {...register('storeDescription')}
-                className="w-full rounded-lg border border-slate-300 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                className="w-full rounded-xl border border-slate-300 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               ></textarea>
             </div>
           </div>
         )}
 
         <Button type="submit" variant="primary" className="w-full" size="lg" isLoading={isLoading}>
-          Create Account
+          {selectedRole === 'SELLER' ? 'Submit Merchant Application' : 'Create Account'}
         </Button>
       </form>
 
