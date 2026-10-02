@@ -79,5 +79,17 @@ export const requireSeller = [authenticateUser, authorizeRoles('SELLER')];
 export const requireCustomer = [authenticateUser, authorizeRoles('CUSTOMER')];
 export const requireSupport = [authenticateUser, authorizeRoles('SUPPORT')];
 export const requireDelivery = [authenticateUser, authorizeRoles('DELIVERY')];
-export const requireStaff = [authenticateUser, authorizeRoles('ADMIN', 'SUPPORT')];
-export const requireSellerOrAdmin = [authenticateUser, authorizeRoles('SELLER', 'ADMIN')];
+export const requireProductManager = [authenticateUser, authorizeRoles('PRODUCT_MANAGER', 'ADMIN')];
+export const requireProductManagerOrSeller = [
+  authenticateUser,
+  authorizeRoles('PRODUCT_MANAGER', 'SELLER', 'ADMIN'),
+];
+export const requireStaff = [
+  authenticateUser,
+  authorizeRoles('ADMIN', 'SUPPORT', 'PRODUCT_MANAGER'),
+];
+export const requireSellerOrAdmin = [
+  authenticateUser,
+  authorizeRoles('SELLER', 'ADMIN', 'PRODUCT_MANAGER'),
+];
+

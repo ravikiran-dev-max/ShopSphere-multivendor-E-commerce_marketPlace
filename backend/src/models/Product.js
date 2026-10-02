@@ -72,7 +72,7 @@ const productSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['DRAFT', 'ACTIVE', 'INACTIVE', 'MODERATION_BLOCKED'],
+      enum: ['DRAFT', 'ACTIVE', 'INACTIVE', 'OUTDATED', 'ARCHIVED', 'MODERATION_BLOCKED'],
       default: 'ACTIVE',
       index: true,
     },

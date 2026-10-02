@@ -1,6 +1,8 @@
 import Product from '../models/Product.js';
 import Inventory from '../models/Inventory.js';
 import SellerProfile from '../models/SellerProfile.js';
+import AuditLog from '../models/AuditLog.js';
+import Review from '../models/Review.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -288,9 +290,9 @@ export const updateProduct = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Delete product (Seller owner or Admin)
+ * @desc    Delete product (Seller owner, Product Manager, or Admin)
  * @route   DELETE /api/v1/products/:id
- * @access  Private (Seller Owner or Admin)
+ * @access  Private (Seller Owner, Product Manager, or Admin)
  */
 export const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
@@ -298,12 +300,191 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Product not found.');
   }
 
-  if (req.user.role !== 'ADMIN' && product.seller.toString() !== req.user._id.toString()) {
+  const isStaff = req.user.role === 'ADMIN' || req.user.role === 'PRODUCT_MANAGER';
+  if (!isStaff && product.seller.toString() !== req.user._id.toString()) {
     throw new ApiError(403, 'Forbidden: You cannot delete another seller\'s product.');
   }
+
+  await AuditLog.create({
+    actor: req.user._id,
+    action: 'PRODUCT_DELETED',
+    targetModel: 'Product',
+    targetId: product._id,
+    ipAddress: req.ip,
+    metadata: { title: product.title, role: req.user.role },
+  });
 
   await product.deleteOne();
   await Inventory.deleteOne({ product: req.params.id });
 
   res.status(200).json(new ApiResponse(200, null, 'Product deleted successfully.'));
 });
+
+/**
+ * @desc    Apply or modify discount pricing on a product (Product Manager or Admin)
+ * @route   PATCH /api/v1/products/:id/discount
+ * @access  Private (Product Manager or Admin)
+ */
+export const updateProductDiscount = asyncHandler(async (req, res) => {
+  const { discountPrice, discountPercent } = req.body;
+
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    throw new ApiError(404, 'Product not found.');
+  }
+
+  let finalDiscountPrice = null;
+
+  if (discountPercent !== undefined && discountPercent !== null) {
+    const percent = Number(discountPercent);
+    if (percent < 0 || percent > 99) {
+      throw new ApiError(400, 'Discount percentage must be between 0 and 99.');
+    }
+    if (percent === 0) {
+      finalDiscountPrice = null;
+    } else {
+      finalDiscountPrice = Math.round(product.price * (1 - percent / 100));
+    }
+  } else if (discountPrice !== undefined) {
+    if (discountPrice === null || discountPrice === '' || Number(discountPrice) === 0) {
+      finalDiscountPrice = null;
+    } else {
+      const val = Number(discountPrice);
+      if (val >= product.price) {
+        throw new ApiError(400, 'Discount price must be less than regular base price.');
+      }
+      finalDiscountPrice = val;
+    }
+  }
+
+  const previousDiscount = product.discountPrice;
+  product.discountPrice = finalDiscountPrice;
+  await product.save();
+
+  await AuditLog.create({
+    actor: req.user._id,
+    action: 'PRODUCT_DISCOUNT_UPDATED',
+    targetModel: 'Product',
+    targetId: product._id,
+    ipAddress: req.ip,
+    metadata: {
+      title: product.title,
+      basePrice: product.price,
+      previousDiscount,
+      newDiscount: finalDiscountPrice,
+    },
+  });
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      product,
+      finalDiscountPrice
+        ? `Discount applied! Active price is now ₹${finalDiscountPrice}.`
+        : 'Discount removed. Standard base price restored.'
+    )
+  );
+});
+
+/**
+ * @desc    Update product lifecycle status (e.g. mark OUTDATED, ARCHIVED, ACTIVE)
+ * @route   PATCH /api/v1/products/:id/status
+ * @access  Private (Product Manager or Admin)
+ */
+export const updateProductStatus = asyncHandler(async (req, res) => {
+  const { status, reason } = req.body;
+
+  const validStatuses = ['DRAFT', 'ACTIVE', 'INACTIVE', 'OUTDATED', 'ARCHIVED', 'MODERATION_BLOCKED'];
+  if (!status || !validStatuses.includes(status)) {
+    throw new ApiError(400, `Invalid status. Permitted: ${validStatuses.join(', ')}`);
+  }
+
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    throw new ApiError(404, 'Product not found.');
+  }
+
+  const previousStatus = product.status;
+  product.status = status;
+  await product.save();
+
+  await AuditLog.create({
+    actor: req.user._id,
+    action: 'PRODUCT_STATUS_UPDATED',
+    targetModel: 'Product',
+    targetId: product._id,
+    ipAddress: req.ip,
+    metadata: { previousStatus, newStatus: status, reason },
+  });
+
+  res.status(200).json(
+    new ApiResponse(200, product, `Product status transitioned to ${status}.`)
+  );
+});
+
+/**
+ * @desc    Toggle product featured badge
+ * @route   PATCH /api/v1/products/:id/feature
+ * @access  Private (Product Manager or Admin)
+ */
+export const toggleProductFeature = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    throw new ApiError(404, 'Product not found.');
+  }
+
+  product.isFeatured = !product.isFeatured;
+  await product.save();
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      product,
+      product.isFeatured ? 'Product promoted to Featured catalog.' : 'Product removed from Featured.'
+    )
+  );
+});
+
+/**
+ * @desc    Get aggregated catalog metrics for Product Manager dashboard
+ * @route   GET /api/v1/products/manager/analytics
+ * @access  Private (Product Manager or Admin)
+ */
+export const getProductManagerAnalytics = asyncHandler(async (req, res) => {
+  const totalProducts = await Product.countDocuments({});
+  const activeProducts = await Product.countDocuments({ status: 'ACTIVE' });
+  const outdatedProducts = await Product.countDocuments({
+    $or: [{ status: 'OUTDATED' }, { status: 'ARCHIVED' }, { stock: 0 }],
+  });
+  const discountedProducts = await Product.countDocuments({
+    discountPrice: { $ne: null, $gt: 0 },
+  });
+  const zeroStockProducts = await Product.countDocuments({ stock: 0 });
+  const lowStockProducts = await Product.countDocuments({ stock: { $gt: 0, $lte: 5 } });
+  const totalReviews = await Review.countDocuments({});
+
+  const ratingAgg = await Product.aggregate([
+    { $match: { ratingCount: { $gt: 0 } } },
+    { $group: { _id: null, avgRating: { $avg: '$ratingAverage' } } },
+  ]);
+
+  const platformAvgRating = ratingAgg.length > 0 ? Number(ratingAgg[0].avgRating.toFixed(1)) : 4.8;
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        totalProducts,
+        activeProducts,
+        outdatedProducts,
+        discountedProducts,
+        zeroStockProducts,
+        lowStockProducts,
+        totalReviews,
+        platformAvgRating,
+      },
+      'Product Manager analytics retrieved.'
+    )
+  );
+});
+

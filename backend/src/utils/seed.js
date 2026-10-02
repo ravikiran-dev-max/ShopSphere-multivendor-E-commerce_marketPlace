@@ -80,6 +80,16 @@ async function seedDatabase() {
     status: 'ACTIVE',
   });
 
+  const pmUser = await User.create({
+    name: 'Elena Rostova (Product Manager)',
+    email: 'pm@shopsphere.dev',
+    password: 'Manager@123456',
+    role: 'PRODUCT_MANAGER',
+    status: 'ACTIVE',
+    phone: '+91 9876543215',
+  });
+
+
   console.log('[ShopSphere Seed] Creating Profiles...');
   const seller1Profile = await SellerProfile.create({
     user: seller1User._id,

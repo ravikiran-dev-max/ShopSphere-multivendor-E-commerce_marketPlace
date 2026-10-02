@@ -110,3 +110,36 @@ export const getMyReviews = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, reviews, 'Customer reviews retrieved.'));
 });
 
+/**
+ * @desc    Delete review (Product Manager or Admin moderation)
+ * @route   DELETE /api/v1/reviews/:id
+ * @access  Private (Product Manager or Admin)
+ */
+export const deleteReview = asyncHandler(async (req, res) => {
+  const review = await Review.findById(req.params.id);
+  if (!review) {
+    throw new ApiError(404, 'Review not found.');
+  }
+
+  const productId = review.product;
+  await review.deleteOne();
+
+  // Re-calculate product aggregate rating
+  const reviews = await Review.find({ product: productId });
+  const product = await Product.findById(productId);
+  if (product) {
+    if (reviews.length === 0) {
+      product.ratingAverage = 0;
+      product.ratingCount = 0;
+    } else {
+      const totalRating = reviews.reduce((acc, r) => acc + r.rating, 0);
+      product.ratingAverage = Number((totalRating / reviews.length).toFixed(1));
+      product.ratingCount = reviews.length;
+    }
+    await product.save();
+  }
+
+  res.status(200).json(new ApiResponse(200, null, 'Review removed by moderation.'));
+});
+
+

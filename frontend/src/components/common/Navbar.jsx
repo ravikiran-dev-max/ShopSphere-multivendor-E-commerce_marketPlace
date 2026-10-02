@@ -71,26 +71,31 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
       {/* Top Banner Notice */}
-      <div className="bg-slate-900 text-white text-xs py-1.5 px-4 text-center font-medium">
-        ✨ Welcome to <span className="text-indigo-400 font-bold">SHOPSPHERE</span> - The Premier Multi-Vendor Marketplace | Express Delivery & 100% Verified Sellers
+      <div className="bg-slate-900 text-white text-xs py-1.5 px-4 font-medium">
+         Welcome to <span className="text-indigo-400 font-bold">WHITEZA</span> - Find your fashion Here
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-indigo-200">
-              S
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tight text-slate-900 leading-none">
-                Shop<span className="text-indigo-600">Sphere</span>
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium tracking-widest uppercase">
-                Marketplace
-              </span>
-            </div>
-          </Link>
+       <Link to="/" className="flex items-center gap-2 shrink-0">
+  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-gray-800 to-gray-600 flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-gray-300">
+    <img
+      src="WHITEZA.png"
+      alt="WHITEZA Logo"
+      className=" object-contain"
+    />
+  </div>
+  <div className="flex flex-col">
+    <span className="text-xl font-black tracking-tight text-slate-900 leading-none">
+      WHITE<span className="text-gray-700">ZA</span>
+    </span>
+    <span className="text-[10px] text-slate-400 font-medium tracking-widest uppercase">
+      Find Your Fashion Here
+    </span>
+  </div>
+</Link>
+
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="flex-1 max-w-2xl hidden md:block">

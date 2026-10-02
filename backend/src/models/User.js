@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: {
-        values: ['ADMIN', 'SELLER', 'CUSTOMER', 'SUPPORT', 'DELIVERY'],
+        values: ['ADMIN', 'SELLER', 'CUSTOMER', 'SUPPORT', 'DELIVERY', 'PRODUCT_MANAGER'],
         message: 'Invalid role specified',
       },
       default: 'CUSTOMER',

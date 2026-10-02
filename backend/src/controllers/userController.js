@@ -112,7 +112,7 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
 export const updateUserRole = asyncHandler(async (req, res) => {
   const { role } = req.body;
 
-  if (!['ADMIN', 'SELLER', 'CUSTOMER', 'SUPPORT', 'DELIVERY'].includes(role)) {
+  if (!['ADMIN', 'SELLER', 'CUSTOMER', 'SUPPORT', 'DELIVERY', 'PRODUCT_MANAGER'].includes(role)) {
     throw new ApiError(400, 'Invalid role specified.');
   }
 
