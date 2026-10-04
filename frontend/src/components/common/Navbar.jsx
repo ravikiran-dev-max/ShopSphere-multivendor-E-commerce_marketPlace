@@ -78,12 +78,12 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
-       <Link to="/" className="flex items-center gap-2 shrink-0">
+    <Link to="/" className="flex items-center gap-2 shrink-0">
   <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-gray-800 to-gray-600 flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-gray-300">
     <img
-      src="WHITEZA.png"
+      src="WHITEZA.png"   // ✅ use a proper relative path
       alt="WHITEZA Logo"
-      className=" object-contain"
+      className="w-10 h-10 object-contain" // ✅ added width/height for consistency
     />
   </div>
   <div className="flex flex-col">
@@ -97,6 +97,7 @@ const Navbar = () => {
 </Link>
 
 
+
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="flex-1 max-w-2xl hidden md:block">
             <div className="relative">
@@ -108,57 +109,65 @@ const Navbar = () => {
                 className="w-full bg-slate-100/80 hover:bg-slate-100 text-slate-800 text-sm rounded-full py-2.5 pl-11 pr-24 border border-transparent focus:border-indigo-500 focus:bg-white focus:outline-none transition-all"
               />
               <FiSearch className="absolute left-4 top-3 text-slate-400 w-4 h-4" />
-              <button
-                type="submit"
-                className="absolute right-1.5 top-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-1.5 rounded-full font-medium transition-colors"
-              >
-                Search
-              </button>
+             <button
+  type="submit"
+  className="absolute right-1.5 top-1 
+             bg-black/50 hover:bg-gray-700 
+             text-white text-xs px-4 py-1.5 
+             rounded-full font-medium 
+             backdrop-blur-sm transition-colors"
+>
+  Search
+</button>
+
             </div>
           </form>
 
           {/* Action Links & Profile */}
           <div className="hidden lg:flex items-center gap-6">
-            <Link
-              to="/products"
-              className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
-            >
-              Browse All
-            </Link>
-            <Link
-              to="/sellers"
-              className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
-            >
-              Top Sellers
-            </Link>
+          
+   <Link
+    to="/products"
+    className="text-sm font-medium text-slate-600 hover:text-black transition-colors duration-300 hover:scale-105 transform"
+  >
+   Products
+  </Link>
+  <Link
+    to="/sellers"
+    className="text-sm font-medium text-slate-600 hover:text-black transition-colors duration-300 hover:scale-105 transform"
+  >
+    Top Sellers
+  </Link>
 
-            <div className="h-4 w-px bg-slate-200"></div>
+  <div className="h-4 w-px bg-slate-200"></div>
 
-            {/* Wishlist */}
-            <Link
-              to="/wishlist"
-              className="text-slate-600 hover:text-indigo-600 transition-colors relative p-1.5"
-              title="Wishlist"
-            >
-              <FiHeart className="w-5 h-5" />
-            </Link>
+  {/* Wishlist */}
+  <Link
+    to="/wishlist"
+    className="text-slate-600 hover:text-black transition-colors duration-300 relative p-1.5 hover:rotate-12 transform"
+    title="Wishlist"
+  >
+    <FiHeart className="w-5 h-5" />
+  </Link>
 
-            {/* Cart */}
-            <Link
-              to="/cart"
-              className="text-slate-600 hover:text-indigo-600 transition-colors relative p-1.5 flex items-center gap-2"
-              title="Cart"
-            >
-              <div className="relative">
-                <FiShoppingCart className="w-5 h-5" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-in zoom-in">
-                    {cartCount}
-                  </span>
-                )}
-              </div>
-              <span className="text-sm font-semibold text-slate-800">Cart</span>
-            </Link>
+  {/* Cart */}
+  <Link
+    to="/cart"
+    className="text-slate-600 hover:text-black transition-colors duration-300 relative p-1.5 flex items-center gap-2 hover:scale-105 transform"
+    title="Cart"
+  >
+    <div className="relative">
+      <FiShoppingCart className="w-5 h-5 transition-transform duration-300 hover:rotate-6" />
+      {cartCount > 0 && (
+        <span className="absolute -top-2 -right-2 bg-black text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-bounce">
+          {cartCount}
+        </span>
+      )}
+    </div>
+    <span className="text-sm font-semibold text-slate-800">Cart</span>
+  </Link>
+
+
 
             {/* User Dropdown / Login */}
             {isAuthenticated ? (

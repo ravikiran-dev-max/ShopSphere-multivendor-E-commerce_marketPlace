@@ -11,7 +11,7 @@ try {
 }
 
 const connectDB = async () => {
-  const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shopsphere';
+  const uri = process.env.MONGO_URI;
 
   try {
     const conn = await mongoose.connect(uri, {

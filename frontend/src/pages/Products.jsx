@@ -115,7 +115,7 @@ const Products = () => {
             <option value="rating">Top Rated</option>
           </select>
         </div>
-      </div>
+      </div>        
 
       {/* Product Grid */}
       {isLoading ? (

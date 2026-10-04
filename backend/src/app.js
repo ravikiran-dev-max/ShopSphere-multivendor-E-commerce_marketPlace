@@ -127,7 +127,7 @@ app.get('/', (req, res) => {
     new ApiResponse(
       200,
       {
-        system: 'ShopSphere Multi-Vendor Marketplace Backend',
+        system: 'WHITEZA',
         version: '1.0.0',
         environment: process.env.NODE_ENV || 'development',
         healthCheck: '/api/v1/health',

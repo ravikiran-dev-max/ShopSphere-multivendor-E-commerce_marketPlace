@@ -16,19 +16,19 @@ const Button = ({
     'inline-flex items-center justify-center font-medium transition-all duration-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
 
   const variants = {
-    primary:
-      'bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500 shadow-sm shadow-indigo-200',
-    secondary:
-      'bg-slate-800 hover:bg-slate-900 text-white focus:ring-slate-700 shadow-sm',
-    outline:
-      'border border-slate-300 hover:bg-slate-50 text-slate-700 focus:ring-indigo-500',
-    ghost:
-      'bg-transparent hover:bg-slate-100 text-slate-700 focus:ring-slate-400',
-    danger:
-      'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500 shadow-sm shadow-rose-200',
-    success:
-      'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500 shadow-sm shadow-emerald-200',
-  };
+  primary:
+    'bg-black/70 hover:bg-black text-white backdrop-blur-md border border-gray-700 focus:ring-gray-500 shadow-md',
+  secondary:
+    'bg-white/30 hover:bg-white/40 text-black backdrop-blur-md border border-gray-300 focus:ring-gray-400 shadow-md',
+  outline:
+    'border border-gray-400 hover:bg-gray-100 text-black focus:ring-gray-500 backdrop-blur-sm',
+  ghost:
+    'bg-transparent hover:bg-gray-200 text-black focus:ring-gray-400',
+  danger:
+    'bg-black/80 hover:bg-black text-white border border-gray-600 focus:ring-gray-500 shadow-md',
+  success:
+    'bg-white/40 hover:bg-white/50 text-black border border-gray-300 focus:ring-gray-400 shadow-md',
+};
 
   const sizes = {
     sm: 'px-3 py-1.5 text-xs gap-1.5',
