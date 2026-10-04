@@ -28,7 +28,7 @@ const Home = () => {
         Discover & Shop from Thousands of Verified Sellers.
       </h1>
       <p className="text-gray-300 text-base sm:text-lg leading-relaxed animate-slideUp">
-        ShopSphere brings together top independent vendors, seamless order splitting, real-time tracking, and multi-vendor checkout into one unified shopping experience.
+        WhiteZa brings together top independent vendors, seamless order splitting, real-time tracking, and multi-vendor checkout into one unified shopping experience.
       </p>
       <div className="flex flex-wrap gap-4 pt-2">
         <Link to="/products">

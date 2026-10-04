@@ -91,7 +91,7 @@ const Navbar = () => {
       WHITE<span className="text-gray-700">ZA</span>
     </span>
     <span className="text-[10px] text-slate-400 font-medium tracking-widest uppercase">
-      Find Your Fashion Here
+      lets grow to-gether
     </span>
   </div>
 </Link>
